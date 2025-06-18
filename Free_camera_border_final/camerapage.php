@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Step 1: Capture Photos</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+
+    video {
+      width: 300px;
+      height: 225px;
+      border: 2px solid #000;
+      margin-bottom: 10px;
+    }
+
+    #countdown {
+      font-size: 40px;
+      color: red;
+      height: 50px;
+      font-weight: bold;
+    }
+
+    #captureBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 15px;
+    }
+
+    .preview-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .preview-container img {
+      width: 90px;
+      height: 68px;
+      border: 2px solid #333;
+      object-fit: cover;
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Step 1: Take 3 Photos</h2>
+
+<video id="video" autoplay playsinline></video>
+<div id="countdown"></div>
+<button id="captureBtn">Start Capture</button>
+
+<div class="preview-container" id="previewContainer">
+
+</div>
+
+<script>
+  const video = document.getElementById('video');
+  const countdown = document.getElementById('countdown');
+  const captureBtn = document.getElementById('captureBtn');
+  const previewContainer = document.getElementById('previewContainer');
+
+  const capturedImages = [];
+
+  
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+    .then(stream => video.srcObject = stream)
+    .catch(() => alert("Camera not available."));
+
+  function countdownTimer(seconds) {
+    return new Promise(resolve => {
+      let time = seconds;
+      countdown.textContent = time;
+      const interval = setInterval(() => {
+        time--;
+        countdown.textContent = time;
+        if (time <= 0) {
+          clearInterval(interval);
+          countdown.textContent = '';
+          resolve();
+        }
+      }, 1000);
+    });
+  }
+
+  async function startCapture() {
+    captureBtn.disabled = true;
+
+    for (let i = 0; i < 3; i++) {
+      await countdownTimer(3);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 300;
+      canvas.height = 225;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const imageData = canvas.toDataURL("image/png");
+      capturedImages.push(imageData);
+
+      const img = document.createElement('img');
+      img.src = imageData;
+      previewContainer.appendChild(img);
+    }
+
+   
+    localStorage.setItem('capturedPhotos', JSON.stringify(capturedImages));
+    window.location.href = "Fborderpage.html";   // dito ilalagay ang next page papuntang edit
+  }
+
+  captureBtn.addEventListener('click', startCapture);
+</script>
+
+</body>
+</html>
